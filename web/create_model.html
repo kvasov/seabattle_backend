@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать модель</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .links a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Создать новую модель</h1>
+
+        <form id="modelForm">
+            <div class="form-group">
+                <label for="name">Название модели:</label>
+                <input type="text" id="name" name="name" required placeholder="Введите название модели">
+            </div>
+
+            <button type="submit" id="submitBtn">Создать модель</button>
+        </form>
+
+        <div id="message"></div>
+
+        <div class="links">
+            <a href="/models">Просмотреть все модели</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('modelForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const messageDiv = document.getElementById('message');
+            const nameInput = document.getElementById('name');
+
+            // Отключаем кнопку и показываем загрузку
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Создание...';
+            messageDiv.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/model', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: nameInput.value
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    messageDiv.innerHTML = `
+                        <div class="message success">
+                            Модель успешно создана! ID: ${result.id}
+                        </div>
+                    `;
+                    nameInput.value = '';
+                } else {
+                    const error = await response.json();
+                    messageDiv.innerHTML = `
+                        <div class="message error">
+                            Ошибка: ${error.error || 'Неизвестная ошибка'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                messageDiv.innerHTML = `
+                    <div class="message error">
+                        Ошибка сети: ${error.message}
+                    </div>
+                `;
+            } finally {
+                // Восстанавливаем кнопку
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Создать модель';
+            }
+        });
+    </script>
+</body>
+</html>
