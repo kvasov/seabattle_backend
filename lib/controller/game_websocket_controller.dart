@@ -65,7 +65,7 @@ class GameWSController extends Controller {
   // Запускает периодическую проверку и закрытие неактивных соединений
   static void _startCleanupTimer() {
     if (_cleanupTimer != null && _cleanupTimer!.isActive) {
-      return; // Таймер уже запущен
+      return;
     }
 
     _cleanupTimer = Timer.periodic(

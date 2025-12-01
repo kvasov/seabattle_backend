@@ -6,7 +6,6 @@ class Game extends ManagedObject<_Game> implements _Game {
     createdAt = DateTime.now().toUtc();
     cancelled ??= false;
     accepted ??= false;
-    completed ??= false;
   }
 }
 
@@ -22,9 +21,6 @@ class _Game {
 
   @Column(indexed: true)
   bool? accepted;
-
-  @Column(indexed: true)
-  bool? completed;
 
   DateTime? createdAt;
 }

@@ -14,9 +14,6 @@ class GameController extends ResourceController {
       final query = Query<Game>(context)
         ..values = game;
 
-      // Задержка перед добавлением записи
-      // await Future.delayed(const Duration(seconds: 1));
-
       final insertedGame = await query.insert();
 
       // Возвращаем только ID созданной записи

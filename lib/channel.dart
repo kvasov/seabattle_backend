@@ -60,18 +60,15 @@ class SeabattleChannel extends ApplicationChannel {
         .link(() => AcceptGameController(context));
 
     router
-        .route("/api/game/complete/:id")
-        .link(() => CompleteGameController(context));
-
-    router
         .route("/api/game/send-ships-to-opponent/:id")
         .link(() => SendShipsToOpponentController(context));
+
     router
         .route("/api/game/send-shot-to-opponent/:id")
         .link(() => SendShotToOpponentController(context));
 
 
-    // API роут для создания записи
+    // API роут для создания игры
     router
         .route("/api/game")
         .link(() => GameController(context));

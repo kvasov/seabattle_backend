@@ -30,7 +30,7 @@ abstract class GameUpdateController extends ResourceController {
         return Response.notFound(body: {'error': 'Игра с id $_id не найдена'});
       }
 
-      print("game: id=${game.id}, cancelled=${game.cancelled}, accepted=${game.accepted}, completed=${game.completed}");
+      print("game: id=${game.id}, cancelled=${game.cancelled}, accepted=${game.accepted}");
 
       // Проверки перед обновлением
       switch (fieldName) {
@@ -63,9 +63,6 @@ abstract class GameUpdateController extends ResourceController {
         case 'accepted':
           updateQuery.values.accepted = true;
           break;
-        case 'completed':
-          updateQuery.values.completed = true;
-          break;
         default:
           return Response.badRequest(body: {'error': 'Неизвестное поле'});
       }
@@ -90,7 +87,6 @@ abstract class GameUpdateController extends ResourceController {
         'name': updatedGame.name,
         'cancelled': updatedGame.cancelled,
         'accepted': updatedGame.accepted,
-        'completed': updatedGame.completed,
         'createdAt': updatedGame.createdAt?.toIso8601String()
       })..contentType = ContentType.json;
     } catch (e) {
@@ -119,16 +115,5 @@ class AcceptGameController extends GameUpdateController {
     print("acceptGame raw request body: $body");
     print("acceptGame controller called with id: $id");
     return await updateGameField(id, 'accepted', body['userUniqueId']);
-  }
-}
-
-class CompleteGameController extends GameUpdateController {
-  CompleteGameController(super.context);
-
-  @Operation.post('id')
-  Future<Response> completeGame(@Bind.path('id') int id, @Bind.body() Map<String, dynamic> body) async {
-    print("completeGame raw request body: $body");
-    print("completeGame controller called with id: $id");
-    return await updateGameField(id, 'completed', body['userUniqueId']);
   }
 }
