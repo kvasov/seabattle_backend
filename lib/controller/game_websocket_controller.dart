@@ -8,11 +8,11 @@ import 'package:conduit_core/conduit_core.dart';
 class GameWSController extends Controller {
   static final List<_WsClient> _clients = [];
 
-  // Таймаут неактивности в секундах (по умолчанию 5 минут)
-  static const int _idleTimeoutSeconds = 30;
+  // Таймаут неактивности в секундах
+  static const int _idleTimeoutSeconds = 300;
 
   // Интервал проверки неактивных соединений в секундах
-  static const int _cleanupIntervalSeconds = 10;
+  static const int _cleanupIntervalSeconds = 30;
 
   static Timer? _cleanupTimer;
 
