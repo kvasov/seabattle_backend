@@ -20,6 +20,7 @@ class GameWSController extends Controller {
   Future<RequestOrResponse> handle(Request request) async {
     if (request.raw.uri.path.endsWith('/ws')) {
       if (WebSocketTransformer.isUpgradeRequest(request.raw)) {
+        // ignore: close_sinks
         final socket = await WebSocketTransformer.upgrade(request.raw);
 
         int? gameIdFilter;
@@ -29,6 +30,17 @@ class GameWSController extends Controller {
 
         // Запускаем периодическую очистку неактивных соединений
         _startCleanupTimer();
+
+        // Отслеживаем закрытие сокета для явного управления ресурсами
+        // Сокет будет закрыт через _closeClient() в onDone/onError или при таймауте
+        unawaited(
+          socket.done.then((_) {
+            _closeClient(client);
+          }).catchError((error) {
+            print('🧲 Ошибка WebSocket: $error');
+            _closeClient(client);
+          }),
+        );
 
         socket.listen((message) {
           print('🧲 Connected to WebSocket, message: $message');
@@ -47,11 +59,11 @@ class GameWSController extends Controller {
         },
         onDone: () {
           print('🧲 WebSocket соединение закрыто');
-          _clients.remove(client);
+          _closeClient(client);
         },
         onError: (error) {
           print('🧲 Ошибка WebSocket: $error');
-          _clients.remove(client);
+          _closeClient(client);
         });
 
         // После upgrade не возвращаем Response, так как соединение уже обновлено до WebSocket
@@ -69,7 +81,7 @@ class GameWSController extends Controller {
     }
 
     _cleanupTimer = Timer.periodic(
-      Duration(seconds: _cleanupIntervalSeconds),
+      const Duration(seconds: _cleanupIntervalSeconds),
       (timer) {
         final now = DateTime.now();
         final clientsToRemove = <_WsClient>[];
@@ -80,23 +92,30 @@ class GameWSController extends Controller {
           if (idleDuration > _idleTimeoutSeconds) {
             print('🧲 Закрытие неактивного соединения (неактивность: ${idleDuration}с)');
             clientsToRemove.add(client);
-            try {
-              client.socket.close();
-            } catch (e) {
-              print('Ошибка при закрытии сокета: $e');
-            }
           }
         }
 
-        for (final client in clientsToRemove) {
-          _clients.remove(client);
-        }
+        clientsToRemove.forEach(_closeClient);
 
         if (clientsToRemove.isNotEmpty) {
           print('🧲 Удалено неактивных соединений: ${clientsToRemove.length}');
         }
       },
     );
+  }
+
+  // Безопасно закрывает соединение и удаляет клиента из списка
+  static void _closeClient(_WsClient client) {
+    try {
+      // Закрываем сокет только если он еще не закрыт
+      if (client.socket.closeCode == null) {
+        client.socket.close();
+      }
+    } catch (e) {
+      print('Ошибка при закрытии сокета: $e');
+    } finally {
+      _clients.remove(client);
+    }
   }
 
   // Рассылаем информацию об обновлении игры
@@ -123,9 +142,7 @@ class GameWSController extends Controller {
     }
 
     // Удаляем клиентов с ошибками
-    for (final client in clientsToRemove) {
-      _clients.remove(client);
-    }
+    clientsToRemove.forEach(_closeClient);
   }
 
   static void broadcastSendShips(int id, String userUniqueId, List<Map<String, dynamic>> ships) {
@@ -156,12 +173,10 @@ class GameWSController extends Controller {
     }
 
     // Удаляем клиентов с ошибками
-    for (final client in clientsToRemove) {
-      _clients.remove(client);
-    }
+    clientsToRemove.forEach(_closeClient);
   }
 
-  static void broadcastSendShot(int id, String userUniqueId, int x, int y, bool isHit) {
+  static void broadcastSendShot(int id, String userUniqueId, int x, int y, {required bool isHit}) {
     print('🧲 broadcastSendShot: $id, $userUniqueId, $x, $y');
     final dataJson = jsonEncode(
       {
@@ -192,9 +207,7 @@ class GameWSController extends Controller {
     }
 
     // Удаляем клиентов с ошибками
-    for (final client in clientsToRemove) {
-      _clients.remove(client);
-    }
+    clientsToRemove.forEach(_closeClient);
   }
 }
 

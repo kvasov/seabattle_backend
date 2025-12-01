@@ -15,7 +15,7 @@ class SendShotToOpponentController extends ResourceController {
       final x = body['x'] as int;
       final y = body['y'] as int;
       final isHit = body['isHit'] as bool;
-      GameWSController.broadcastSendShot(id, body['userUniqueId'], x, y, isHit);
+      GameWSController.broadcastSendShot(id, body['userUniqueId'], x, y, isHit: isHit);
 
       return Response.ok({'message': 'Выстрел отправлен сопернику'})..contentType = ContentType.json;
     } catch (e) {
