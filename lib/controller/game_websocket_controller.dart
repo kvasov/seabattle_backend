@@ -9,10 +9,10 @@ class GameWSController extends Controller {
   static final List<_WsClient> _clients = [];
 
   // Таймаут неактивности в секундах (по умолчанию 5 минут)
-  static const int _idleTimeoutSeconds = 300;
+  static const int _idleTimeoutSeconds = 30;
 
   // Интервал проверки неактивных соединений в секундах
-  static const int _cleanupIntervalSeconds = 60;
+  static const int _cleanupIntervalSeconds = 10;
 
   static Timer? _cleanupTimer;
 
@@ -46,7 +46,7 @@ class GameWSController extends Controller {
           }
         },
         onDone: () {
-          print('🧲 WebSocket соединение закрыто клиентом');
+          print('🧲 WebSocket соединение закрыто');
           _clients.remove(client);
         },
         onError: (error) {
