@@ -3,11 +3,32 @@ import 'package:conduit_core/conduit_core.dart';
 import 'package:seabattle_app/controller/game_websocket_controller.dart';
 import 'package:seabattle_app/model/game.dart';
 
+/// Абстрактный базовый контроллер для обновления полей игры.
+///
+/// Предоставляет общую логику для обновления различных полей игры
+/// (например, cancelled, accepted) с валидацией и уведомлением клиентов
+/// через WebSocket о произошедших изменениях.
 abstract class GameUpdateController extends ResourceController {
+  /// Создает новый экземпляр контроллера обновления игры.
+  ///
+  /// [context] - контекст базы данных для выполнения операций с играми.
   GameUpdateController(this.context);
 
+  /// Контекст базы данных для выполнения операций с играми.
   final ManagedContext context;
 
+  /// Обновляет указанное поле игры в базе данных.
+  ///
+  /// Выполняет валидацию перед обновлением (например, проверяет, не была ли
+  /// игра уже принята или отменена). После успешного обновления отправляет
+  /// уведомление всем подключенным клиентам через WebSocket.
+  ///
+  /// Если [id] равен 0, используется ID последней созданной игры.
+  ///
+  /// [id] - ID игры для обновления (0 для последней игры).
+  /// [fieldName] - имя поля для обновления ('cancelled' или 'accepted').
+  /// [userUniqueId] - уникальный идентификатор пользователя, инициировавшего обновление.
+  /// Возвращает [Response] с обновленными данными игры или ошибку.
   Future<Response> updateGameField(int id, String fieldName, String userUniqueId) async {
     try {
       // если id == 0, то берем последнюю игру из БД
@@ -95,9 +116,23 @@ abstract class GameUpdateController extends ResourceController {
   }
 }
 
+/// Контроллер для отмены игры.
+///
+/// Обрабатывает запросы на отмену игры, устанавливая поле cancelled в true.
 class CancelGameController extends GameUpdateController {
+  /// Создает новый экземпляр контроллера отмены игры.
+  ///
+  /// [context] - контекст базы данных для выполнения операций с играми.
   CancelGameController(super.context);
 
+  /// Отменяет игру с указанным ID.
+  ///
+  /// Устанавливает поле cancelled в true для указанной игры и уведомляет
+  /// всех подключенных клиентов через WebSocket.
+  ///
+  /// [id] - ID игры для отмены.
+  /// [body] - тело запроса, должно содержать 'userUniqueId'.
+  /// Возвращает [Response] с обновленными данными игры или ошибку.
   @Operation.post('id')
   Future<Response> cancelGame(@Bind.path('id') int id, @Bind.body() Map<String, dynamic> body) async {
     print("cancelGame raw request body: $body");
@@ -106,9 +141,24 @@ class CancelGameController extends GameUpdateController {
   }
 }
 
+/// Контроллер для принятия игры.
+///
+/// Обрабатывает запросы на принятие игры, устанавливая поле accepted в true.
 class AcceptGameController extends GameUpdateController {
+  /// Создает новый экземпляр контроллера принятия игры.
+  ///
+  /// [context] - контекст базы данных для выполнения операций с играми.
   AcceptGameController(super.context);
 
+  /// Принимает игру с указанным ID.
+  ///
+  /// Устанавливает поле accepted в true для указанной игры и уведомляет
+  /// всех подключенных клиентов через WebSocket. Выполняет проверку, что
+  /// игра не была уже принята или отменена.
+  ///
+  /// [id] - ID игры для принятия.
+  /// [body] - тело запроса, должно содержать 'userUniqueId'.
+  /// Возвращает [Response] с обновленными данными игры или ошибку.
   @Operation.post('id')
   Future<Response> acceptGame(@Bind.path('id') int id, @Bind.body() Map<String, dynamic> body) async {
 

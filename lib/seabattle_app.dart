@@ -1,6 +1,7 @@
-/// seabattle
+/// Библиотека приложения "Морской бой".
 ///
-/// A conduit web server.
+/// Веб-сервер на базе Conduit для игры "Морской бой" с поддержкой
+/// WebSocket соединений для обновлений в реальном времени.
 library seabattle;
 
 export 'dart:async';

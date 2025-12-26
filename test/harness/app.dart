@@ -1,14 +1,14 @@
-import 'package:seabattle_app/seabattle_app.dart';
 import 'package:conduit_test/conduit_test.dart';
+import 'package:seabattle_app/seabattle_app.dart';
 
-export 'package:seabattle_app/seabattle_app.dart';
-export 'package:conduit_test/conduit_test.dart';
-export 'package:test/test.dart';
 export 'package:conduit_core/conduit_core.dart';
+export 'package:conduit_test/conduit_test.dart';
+export 'package:seabattle_app/seabattle_app.dart';
+export 'package:test/test.dart';
 
-/// A testing harness for seabattle_app.
+/// тестовый харнес. Настраиваем окружение для тестов и управляем жизненным циклом.
 ///
-/// A harness for testing an conduit application. Example test file:
+/// пример тестового файла:
 ///
 ///         void main() {
 ///           Harness harness = Harness()..install();
@@ -33,6 +33,5 @@ class Harness extends TestHarness<SeabattleChannel> with TestHarnessORMMixin {
 
   @override
   Future seed() async {
-    // restore any static data. called by resetData.
   }
 }

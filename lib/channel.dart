@@ -6,19 +6,23 @@ import 'package:seabattle_app/controller/send_shot_controller.dart';
 import 'package:seabattle_app/model/game.dart';
 import 'package:seabattle_app/seabattle_app.dart';
 
-/// This type initializes an application.
-///
-/// Override methods in this class to set up routes and initialize services like
-/// database connections. See http://conduit.io/docs/http/channel/.
+  /// Основной канал приложения "Морской бой".
+  ///
+  /// Инициализирует приложение, настраивает маршруты и инициализирует
+  /// сервисы, такие как подключение к базе данных.
+  /// См. http://conduit.io/docs/http/channel/.
 class SeabattleChannel extends ApplicationChannel {
+  /// Контекст базы данных для выполнения операций с моделями.
   late ManagedContext context;
 
-  /// Initialize services in this method.
+  /// Инициализирует сервисы приложения.
   ///
-  /// Implement this method to initialize services, read values from [options]
-  /// and any other initialization required before constructing [entryPoint].
+  /// Выполняет инициализацию сервисов, читает значения из [options]
+  /// и выполняет другую инициализацию, необходимую перед созданием [entryPoint].
   ///
-  /// This method is invoked prior to [entryPoint] being accessed.
+  /// Этот метод вызывается до обращения к [entryPoint].
+  ///
+  /// Настраивает логирование, загружает конфигурацию и создает подключение к базе данных.
   @override
   Future prepare() async {
     logger.onRecord.listen(
@@ -37,12 +41,15 @@ class SeabattleChannel extends ApplicationChannel {
     context = ManagedContext(dataModel, psc);
   }
 
-  /// Construct the request channel.
+  /// Создает точку входа для обработки запросов.
   ///
-  /// Return an instance of some [Controller] that will be the initial receiver
-  /// of all [Request]s.
+  /// Возвращает экземпляр [Controller], который будет начальным получателем
+  /// всех [Request].
   ///
-  /// This method is invoked after [prepare].
+  /// Этот метод вызывается после [prepare].
+  ///
+  /// Настраивает маршруты для WebSocket соединений, API эндпоинтов
+  /// и статических файлов.
   @override
   Controller get entryPoint {
     final router = Router();
@@ -89,10 +96,13 @@ class SeabattleChannel extends ApplicationChannel {
     return router;
   }
 
-  /*
-   * Helper methods
-   */
-
+  /// Создает контекст базы данных с указанными параметрами подключения.
+  ///
+  /// Вспомогательный метод для создания контекста базы данных с
+  /// пользовательскими параметрами подключения.
+  ///
+  /// [connectionInfo] - конфигурация подключения к базе данных.
+  /// Возвращает [ManagedContext] с настроенным подключением.
   ManagedContext contextWithConnectionInfo(
       DatabaseConfiguration connectionInfo) {
     final dataModel = ManagedDataModel.fromCurrentMirrorSystem();
@@ -107,14 +117,21 @@ class SeabattleChannel extends ApplicationChannel {
   }
 }
 
-/// An instance of this class reads values from a configuration
-/// file specific to this application.
+/// Конфигурация приложения "Морской бой".
 ///
-/// Configuration files must have key-value for the properties in this class.
-/// For more documentation on configuration files, see https://conduit.io/docs/configure/ and
+/// Экземпляр этого класса читает значения из файла конфигурации,
+/// специфичного для данного приложения.
+///
+/// Файлы конфигурации должны содержать пары ключ-значение для свойств
+/// этого класса. Для дополнительной документации по файлам конфигурации
+/// см. https://conduit.io/docs/configure/ и
 /// https://pub.dartlang.org/packages/safe_config.
 class SeabattleConfiguration extends Configuration {
+  /// Создает конфигурацию из указанного файла.
+  ///
+  /// [fileName] - путь к файлу конфигурации.
   SeabattleConfiguration(String fileName) : super.fromFile(File(fileName));
 
+  /// Конфигурация подключения к базе данных.
   DatabaseConfiguration? database;
 }
