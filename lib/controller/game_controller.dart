@@ -3,19 +3,31 @@ import 'dart:io';
 import 'package:conduit_core/conduit_core.dart';
 import 'package:seabattle_app/model/game.dart';
 
+/// Контроллер для управления играми.
+///
+/// Предоставляет API для создания новых игр и получения списка всех игр.
+/// Поддерживает как JSON API, так и HTML представление списка игр.
 class GameController extends ResourceController {
+  /// Создает новый экземпляр контроллера игр.
+  ///
+  /// [context] - контекст базы данных для выполнения операций с играми.
   GameController(this.context);
 
+  /// Контекст базы данных для выполнения операций с играми.
   final ManagedContext context;
 
+  /// Создает новую игру в базе данных.
+  ///
+  /// Принимает данные игры в теле запроса и сохраняет их в базе данных.
+  /// Возвращает созданную игру с присвоенным ID и временем создания.
+  ///
+  /// [game] - объект игры с данными для создания.
+  /// Возвращает [Response] с данными созданной игры в формате JSON или ошибку сервера.
   @Operation.post()
   Future<Response> createGame(@Bind.body() Game game) async {
     try {
       final query = Query<Game>(context)
         ..values = game;
-
-      // Задержка перед добавлением записи
-      // await Future.delayed(const Duration(seconds: 1));
 
       final insertedGame = await query.insert();
 
@@ -31,6 +43,12 @@ class GameController extends ResourceController {
     }
   }
 
+  /// Получает список всех игр из базы данных.
+  ///
+  /// Возвращает HTML страницу со списком всех игр, отсортированных
+  /// по дате создания в порядке убывания (новые игры первыми).
+  ///
+  /// Возвращает [Response] с HTML страницей или ошибку сервера.
   @Operation.get()
   Future<Response> getAllGames() async {
     try {
@@ -49,6 +67,13 @@ class GameController extends ResourceController {
     }
   }
 
+  /// Генерирует HTML страницу со списком игр.
+  ///
+  /// Создает HTML разметку с таблицей, содержащей информацию о всех играх.
+  /// Если список игр пуст, отображается соответствующее сообщение.
+  ///
+  /// [games] - список игр для отображения.
+  /// Возвращает HTML строку с полной страницей.
   String _generateHtmlPage(List<Game> games) {
     final gamesHtml = games.map((game) => '''
       <tr>
